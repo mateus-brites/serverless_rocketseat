@@ -1,0 +1,36 @@
+service: nodeless
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  lambdaHashingVersion: 20201221
+  region: sa-east-1
+  memorySize: 256 # tamanho de memoria em megas
+  iamRoleStatement: #Quais serviços da aws essa função está autorizada a utilizar
+    - Effect: Allow # Pode ser Allow ou Restrict para permitir ou restringir algo
+      Action:
+        - s3:GetObject #faz com que a função possa ir no serviço s3 da amazon e buscar informações sobre um objeto armazenado no s3
+        - s3PutObject #Permite que a função salve arquivos dentro do s3
+      Resource: #Informa em qual bucket do s3 essa função está permitida fazer isso
+        "arn:aws:s3:::*"
+
+functions:
+  hello:
+    handler: optmize.handle
+    enviroment:
+      bucket: serverless_Master_Beats # Nome do bucket que iremos criar dentro do s3 o bucket deve ter um nome unico, ou seja, nao pode existir ninguém usando o mesmo nome.
+    events: # Quais eventos iremos ouvir no s3 para disparar a função
+      - s3:
+        bucket: serverless_Master_Beats
+        event: s3:ObjectCreated:*
+        rules: # Irá disparar apenas quando o arquivo estiver dentro da pasta uploads e tiver o sufixo .png
+          - prefix: uploads/
+          - sufix: .jpg
+      - s3:
+        bucket: serverless_Master_Beats
+        event: s3:ObjectCreated:*
+        rules: # Irá disparar apenas quando o arquivo estiver dentro da pasta uploads e tiver o sufixo .png
+          - prefix: uploads/
+          - sufix: .png
